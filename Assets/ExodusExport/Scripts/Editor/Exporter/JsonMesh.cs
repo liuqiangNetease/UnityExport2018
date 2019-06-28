@@ -385,6 +385,11 @@ namespace SceneExport{
 			triangleCollider = meshKey.usageFlags.HasFlag(MeshUsageFlags.TriangleCollider);
 
 			var mesh = meshKey.mesh;
+            if (mesh == null)
+            {
+                Debug.LogError("Mesh is null, name!");
+                return;
+            }
 			name = mesh.name;
 			var filePath = AssetDatabase.GetAssetPath(mesh);
 			resMap.registerAssetPath(filePath);

@@ -400,7 +400,10 @@ namespace SceneExport{
 						string.Format("Saving file #{0} of resource type {1}", objIndex + 1, baseName), 
 						"Writing json data", objIndex, objCount);
 				}
-				var dstObj = converter(srcObj, objIndex, objId);	
+				var dstObj = converter(srcObj, objIndex, objId);
+
+            if (dstObj == null)
+                return null;
 				string fileName;
 				if (dstProcessor != null)
 					dstProcessor(dstObj);
@@ -430,17 +433,24 @@ namespace SceneExport{
 				
 			bool result = false;
 			try{
-				if (objects != null){
-					foreach(var curData in objects.getNewObjectsData()){
-						outObjectPaths.Add(
-							saveResourceToPath(
-								baseDir, curData.data, curData.index, curData.id,
-								objects.numObjects, 
-								converter, nameFunc, baseName, showGui,
-								dstProcessor
-							)
-						);
-						result = true;
+				if (objects != null)
+                {
+					foreach(var curData in objects.getNewObjectsData())
+                    {
+                       //lq begin
+                        var temp = saveResourceToPath(
+                                baseDir, curData.data, curData.index, curData.id,
+                                objects.numObjects,
+                                converter, nameFunc, baseName, showGui,
+                                dstProcessor
+                            );
+
+                        if (string.IsNullOrEmpty(temp) == false)
+                        {
+                            outObjectPaths.Add(temp);
+                            result = true;
+                        }
+                        //end
 					}
 					objects.updateNumObjects();//yup. I forgot that part.
 				}
@@ -557,8 +567,16 @@ namespace SceneExport{
 		}
 		
 		JsonMesh makeJsonMesh(MeshStorageKey meshKey, ResId id){
-			var result = new JsonMesh(meshKey, id, this);
-			if (!meshKey.skeletonRoot || !meshKey.prefab)
+            //var result = new JsonMesh(meshKey, id, this);
+
+            JsonMesh result = null;
+
+            if (meshKey.mesh != null)
+                result = new JsonMesh(meshKey, id, this);
+            else
+                return null;
+
+            if (!meshKey.skeletonRoot || !meshKey.prefab)
 				return result;
 			
 			if (!isSkeletalMesh(meshKey.mesh)){
