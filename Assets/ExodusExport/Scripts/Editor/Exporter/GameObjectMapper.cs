@@ -11,13 +11,36 @@ namespace SceneExport{
 					continue;
 				/*var curId = */
 				getId(curObject);//this creates id for an object
-				foreach(Transform curChild in curObject.transform){
-					if (!curChild)
-						continue;
-					if (!curChild.gameObject)
-						continue;
-					objects.Enqueue(curChild.gameObject);
-				}
+
+                var lodGroup = curObject.GetComponent<LODGroup>();
+                if (lodGroup == null)
+                {
+                    foreach (Transform curChild in curObject.transform)
+                    {
+                        if (!curChild)
+                            continue;
+                        if (!curChild.gameObject)
+                            continue;
+
+
+                        objects.Enqueue(curChild.gameObject);
+                    }
+                }
+                else
+                {
+                    var lods = lodGroup.GetLODs();
+                    
+                    foreach(var lod in lods)
+                    {
+                        var renderers = lod.renderers;
+                        foreach(var renderer in renderers)
+                        {
+                            if(renderer!= null)
+                                objects.Enqueue(renderer.gameObject);
+                        }
+                        break;
+                    }
+                }
 			}
 		}
 		

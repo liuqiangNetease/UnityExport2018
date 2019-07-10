@@ -201,23 +201,55 @@ namespace SceneExport{
 				mesh = resMap.getOrRegMeshId(meshFilter);
 			}
 
-			foreach(Transform curChild in obj.transform){
-				var childId = objMap.getId(curChild.gameObject); 
-				/* ????
-				if (childId < 0){
-					//throw new System.ArgumentException("Could not find child id
-				}
-				*/
-				if (!childId.isValid){					
-				}
-				//var childId = objMap.getId(curChild.gameObject); 
-				children.Add(childId);
-				childNames.Add(curChild.name);
-			}
-			if (obj.transform.parent){
-				parentName = obj.transform.parent.name;
-				parent = objMap.findId(obj.transform.parent.gameObject);
-			}
-		}
+
+            var lodGroup = obj.GetComponent<LODGroup>();
+
+            if (lodGroup == null)
+            {
+                foreach (Transform curChild in obj.transform)
+                {
+                    var childId = objMap.getId(curChild.gameObject);
+                    /* ????
+                    if (childId < 0){
+                        //throw new System.ArgumentException("Could not find child id
+                    }
+                    */
+                    if (!childId.isValid)
+                    {
+                    }
+                    //var childId = objMap.getId(curChild.gameObject); 
+                    children.Add(childId);
+                    childNames.Add(curChild.name);
+                }
+
+                
+            }
+            else
+            {
+                var lods = lodGroup.GetLODs();
+                foreach(var lod in lods)
+                {
+                    var renderers = lod.renderers;
+                    foreach (var renderer in renderers)
+                    {
+                        if (renderer != null)
+                        {
+                            var childId = objMap.getId(renderer.gameObject);
+                            children.Add(childId);
+                            childNames.Add(renderer.gameObject.name);
+
+                        }
+                    }
+                    break;
+                }
+            }
+
+            if (obj.transform.parent)
+            {
+                parentName = obj.transform.parent.name;
+                parent = objMap.findId(obj.transform.parent.gameObject);
+            }
+
+        }
 	}
 }
